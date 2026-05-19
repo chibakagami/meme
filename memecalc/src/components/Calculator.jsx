@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import Display from './Display';
 import Keypad from './Keypad';
 import { evaluateExpression, formatResult } from '../utils/calculator';
@@ -13,6 +13,8 @@ function trailingNumber(expr) {
   return m ? m[0] : null;
 }
 
+const BOOT_STEPS = ['BOOTING...', 'CALC OS v2.4.1', 'READY'];
+
 export default function Calculator() {
   const [expression, setExpression]   = useState('');
   const [displayValue, setDisplayValue] = useState('0');
@@ -21,6 +23,15 @@ export default function Calculator() {
   const [hasMemory, setHasMemory]     = useState(false);
   // afterCalc: true right after = press, so next digit starts fresh
   const [afterCalc, setAfterCalc]     = useState(false);
+  // bootStep: 0-2 show boot messages, 3 = calculator ready
+  const [bootStep, setBootStep]       = useState(0);
+
+  useEffect(() => {
+    const t1 = setTimeout(() => setBootStep(1), 500);
+    const t2 = setTimeout(() => setBootStep(2), 1000);
+    const t3 = setTimeout(() => setBootStep(3), 1500);
+    return () => [t1, t2, t3].forEach(clearTimeout);
+  }, []);
 
   const handleButton = useCallback((label) => {
     // ── Digits 0–9 ────────────────────────────────────────────
@@ -250,15 +261,19 @@ export default function Calculator() {
     }
   }, [expression, displayValue, isDeg, memory, afterCalc]);
 
+  const isBooting = bootStep < 3;
+
   return (
-    <div className="calculator">
+    <div className={`calculator ${isBooting ? '' : 'calc-ready'}`}>
       <Display
         expression={expression}
         displayValue={displayValue}
         isDeg={isDeg}
         hasMemory={hasMemory}
+        bootMessage={isBooting ? BOOT_STEPS[bootStep] : null}
       />
-      <Keypad onButton={handleButton} isDeg={isDeg} />
+      {/* Hide keypad during boot */}
+      {!isBooting && <Keypad onButton={handleButton} isDeg={isDeg} />}
     </div>
   );
 }
