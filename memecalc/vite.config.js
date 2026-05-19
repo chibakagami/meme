@@ -11,8 +11,8 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       manifest: {
-        name: 'Scientific Calculator Pro',
-        short_name: 'Calc Pro',
+        name: '計算機Pro',
+        short_name: '計算機Pro',
         description: 'Advanced scientific calculator with full precision',
         theme_color: '#0d1117',
         background_color: '#0d1117',
